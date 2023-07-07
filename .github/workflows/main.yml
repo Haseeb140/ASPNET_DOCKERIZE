@@ -2,7 +2,7 @@ name: Deploy Docker image to Azure Windows VM
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   deploy:
