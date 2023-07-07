@@ -26,7 +26,7 @@ jobs:
           script: |
             mkdir -p /tmp/karizma
             mv karizma.tar /tmp/karizma/
-            scp /tmp/karizma/karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:/C/Users/haseeb/Desktop/karizma.tar
+            sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -o ConnectTimeout=120 -o ConnectionAttempts=3 /tmp/karizma/karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:/C/Users/haseeb/Desktop/karizma.tar
 
       - name: Execute commands on Azure Windows VM
         uses: appleboy/ssh-action@master
@@ -36,5 +36,3 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           script: |
             ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'cd C:/Users/haseeb/Desktop; docker load -i karizma.tar; docker run -d -p 8080:80 karizma'
-
-
