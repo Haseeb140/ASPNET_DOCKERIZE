@@ -15,25 +15,26 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t karizma .
-          docker save -o karizma.tar your-image-name
+          docker save -o karizma.tar karizma
 
       - name: Transfer Docker image to Azure Windows VM
-        uses: appleboy/scp-action@master
+        uses: appleboy/sftp-upload-action@master
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
-          source: karizma.tar
-          target: C:\Users\haseeb\Desktop\karizma.tar
+          local_path: ./karizma.tar
+          remote_path: 'C:\Users\haseeb\Desktop\karizma.tar'
 
-
-      - name: Connect to Azure Windows VM
-        uses: appleboy/psexec-action@master
+      - name: Execute commands on Azure Windows VM
+        uses: appleboy/winrm-action@master
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
+          port: 5986
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           script: |
             cd C:\Users\haseeb\Desktop
-            docker load -i your-image.tar
-            docker run -d -p 8080:80 your-image-name
+            docker load -i karizma.tar
+            docker run -d -p 8080:80 karizma
+
