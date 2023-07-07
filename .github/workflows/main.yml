@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Build Docker image
         run: |
@@ -18,23 +18,23 @@ jobs:
           docker save -o karizma.tar karizma
 
       - name: Transfer Docker image to Azure Windows VM
-        uses: appleboy/sftp-upload-action@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
-          username: ${{ secrets.WINDOWS_VM_USERNAME }}
-          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
-          local_path: ./karizma.tar
-          remote_path: 'C:\Users\haseeb\Desktop\karizma.tar'
-
-      - name: Execute commands on Azure Windows VM
-        uses: appleboy/winrm-action@master
-        with:
-          host: ${{ secrets.WINDOWS_VM_HOST }}
-          port: 5986
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           script: |
-            cd C:\Users\haseeb\Desktop
-            docker load -i karizma.tar
-            docker run -d -p 8080:80 karizma
+            mkdir -p /tmp/karizma
+            mv karizma.tar /tmp/karizma/
+            scp /tmp/karizma/karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:/C/Users/haseeb/Desktop/karizma.tar
+
+      - name: Execute commands on Azure Windows VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          script: |
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'cd C:/Users/haseeb/Desktop; docker load -i karizma.tar; docker run -d -p 8080:80 karizma'
+
 
