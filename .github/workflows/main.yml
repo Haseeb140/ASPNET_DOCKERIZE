@@ -1,0 +1,39 @@
+name: Deploy Docker image to Azure Windows VM
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t karizma .
+          docker save -o karizma.tar your-image-name
+
+      - name: Transfer Docker image to Azure Windows VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          source: karizma.tar
+          target: C:\Users\haseeb\Desktop\karizma.tar
+
+
+      - name: Connect to Azure Windows VM
+        uses: appleboy/psexec-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          script: |
+            cd C:\Users\haseeb\Desktop
+            docker load -i your-image.tar
+            docker run -d -p 8080:80 your-image-name
