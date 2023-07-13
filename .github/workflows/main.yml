@@ -28,15 +28,28 @@ jobs:
           script: |
             scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop'
 
-      - name: Stop and remove previous container
+      - name: Check if container is already running
         uses: appleboy/ssh-action@master
+        id: check-container
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker stop karizma && docker rm karizma || true'
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker ps -q --filter name=karizma'
+
+      - name: Stop and remove existing container (if present)
+        uses: appleboy/ssh-action@master
+        if: ${{ steps.check-container.outputs.stdout != '' }}
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          port: ${{ secrets.WINDOWS_VM_PORT }}
+          script: |
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker stop karizma'
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker rm karizma'
 
       - name: Load new Docker image and run container
         uses: appleboy/ssh-action@master
@@ -46,4 +59,4 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker load -i C:\Users\comet\Desktop\karizma.tar && docker run -d -p 8066:80 --name karizma karizma'
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker load -i C:\Users\comet\Desktop\karizma.tar; docker run -d -p 8066:80 --name karizma karizma'
