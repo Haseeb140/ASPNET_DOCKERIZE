@@ -48,8 +48,8 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker stop karizma'
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker rm karizma'
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker stop karizma && docker rm karizma'
+
 
       - name: Load new Docker image and run container
         uses: appleboy/ssh-action@master
