@@ -1,4 +1,5 @@
 name: Deploy Docker image to Azure Windows VM
+
 on:
   push:
     branches:
@@ -18,11 +19,6 @@ jobs:
           docker save -o karizma.tar karizma
 
       - name: Transfer Docker image to Azure Windows VM
-        run: |
-          sudo apt-get install -y sshpass
-          sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -P ${{ secrets.WINDOWS_VM_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop'
-
-      - name: Execute commands on Azure Windows VM
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
@@ -30,4 +26,24 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'C:\Users\comet\Desktop'; docker load -i karizma.tar; docker run -d -p 8066:80 karizma'
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop'
+
+      - name: Stop and remove previous container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          port: ${{ secrets.WINDOWS_VM_PORT }}
+          script: |
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker stop karizma && docker rm karizma || true'
+
+      - name: Load new Docker image and run container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          port: ${{ secrets.WINDOWS_VM_PORT }}
+          script: |
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'docker load -i C:\Users\comet\Desktop\karizma.tar && docker run -d -p 8066:80 --name karizma karizma'
