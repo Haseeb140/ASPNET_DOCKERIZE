@@ -54,4 +54,4 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            docker load -i C:\Users\comet\Desktop\karizma.tar; docker run -d -p 8066:80 --name karizma karizma
+            docker load -i C:\Users\comet\Desktop\karizma.tar && docker run -d -p 8066:80 --name karizma karizma
