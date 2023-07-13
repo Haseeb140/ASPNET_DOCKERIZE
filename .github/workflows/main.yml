@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Build Docker image
         run: |
@@ -20,7 +20,7 @@ jobs:
       - name: Transfer Docker image to Azure Windows VM
         run: |
           sudo apt-get install -y sshpass
-          sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:/Users/haseeb/Desktop/'
+          sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop'
 
       - name: Execute commands on Azure Windows VM
         uses: appleboy/ssh-action@master
@@ -28,5 +28,6 @@ jobs:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'cd C:/Users/haseeb/Desktop; docker load -i karizma.tar; docker run -d -p 8080:80 karizma'
+            ssh ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }} 'C:\Users\comet\Desktop'; docker load -i karizma.tar; docker run -d -p 8066:80 karizma'
