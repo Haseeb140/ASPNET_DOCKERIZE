@@ -13,15 +13,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build Docker image
-        run: |
-          docker build -t karizma .
-          docker save -o karizma.tar karizma
+      #- name: Build Docker image
+      #  run: |
+      #    docker build -t karizma .
+      #    docker save -o karizma.tar karizma
 
-      - name: Transfer Docker image to Azure Windows VM
-        run: |
-          sudo apt-get install -y sshpass
-          sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -P ${{ secrets.WINDOWS_VM_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop\'
+      #- name: Transfer Docker image to Azure Windows VM
+      #  run: |
+      #    sudo apt-get install -y sshpass
+      #    sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -P ${{ secrets.WINDOWS_VM_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop\'
 
       - name: Check if container is already running
         uses: appleboy/ssh-action@master
