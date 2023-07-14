@@ -27,14 +27,13 @@ jobs:
       - name: Check if container is already running
         uses: appleboy/ssh-action@master
         id: check-container
-        continue-on-error: true
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            powershell.exe -command "if (docker inspect -f '{{.State.Running}}' karizma) { exit 0 } else { exit 1 }"
+            powershell.exe -command "$container = docker ps -aq --filter 'name=karizma'; if ($container) { exit 0 } else { exit 1 }"
 
       - name: Stop and remove existing container (if present)
         uses: appleboy/ssh-action@master
@@ -46,6 +45,7 @@ jobs:
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
             powershell.exe -command "docker stop karizma; docker rm karizma"
+        continue-on-error: true
 
       - name: Load new Docker image and run container
         uses: appleboy/ssh-action@master
