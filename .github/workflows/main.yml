@@ -31,11 +31,21 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            container_id=$(docker ps -q --filter name=karizma)
-            if [ -n "$container_id" ]; then
-              docker stop "$container_id"
-              docker rm "$container_id"
-            fi
+            container_id=$(docker ps -q --filter name=karizma) && echo "::set-output name=container_id::$container_id"
+            
+
+      - name: Delete and stop container
+        if: steps.check-container.outputs.container_id
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WINDOWS_VM_HOST }}
+          username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          port: ${{ secrets.WINDOWS_VM_PORT }}
+          script: |
+            container_id=${{ needs.check-container.outputs.container_id }} && docker stop "$container_id" && docker rm "$container_id"
+            
+            
 
 
      # - name: Stop and remove existing container (if present)
