@@ -22,7 +22,6 @@ jobs:
       #  run: |
       #    sudo apt-get install -y sshpass
       #    sshpass -p ${{ secrets.WINDOWS_VM_PASSWORD }} scp -P ${{ secrets.WINDOWS_VM_PORT }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null karizma.tar ${{ secrets.WINDOWS_VM_USERNAME }}@${{ secrets.WINDOWS_VM_HOST }}:'C:\Users\comet\Desktop\'
-
       - name: Check if container is already running
         uses: appleboy/ssh-action@master
         id: check-container
@@ -32,18 +31,23 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            docker ps -q --filter name=karizma
+            container_id=$(docker ps -q --filter name=karizma)
+            if [ -n "$container_id" ]; then
+              docker stop "$container_id"
+              docker rm "$container_id"
+            fi
 
-      - name: Stop and remove existing container (if present)
-        uses: appleboy/ssh-action@master
-        if: ${{ steps.check-container.outputs.stdout == '\n' }}
-        with:
-          host: ${{ secrets.WINDOWS_VM_HOST }}
-          username: ${{ secrets.WINDOWS_VM_USERNAME }}
-          password: ${{ secrets.WINDOWS_VM_PASSWORD }}
-          port: ${{ secrets.WINDOWS_VM_PORT }}
-          script: |
-            docker stop karizma && docker rm karizma
+
+     # - name: Stop and remove existing container (if present)
+      #  uses: appleboy/ssh-action@master
+       # if: ${{ steps.check-container.outputs.stdout == '\n' }}
+        #with:
+         # host: ${{ secrets.WINDOWS_VM_HOST }}
+          #username: ${{ secrets.WINDOWS_VM_USERNAME }}
+          #password: ${{ secrets.WINDOWS_VM_PASSWORD }}
+          #port: ${{ secrets.WINDOWS_VM_PORT }}
+          #script: |
+           # docker stop karizma && docker rm karizma
 
 
       - name: Load new Docker image and run container
