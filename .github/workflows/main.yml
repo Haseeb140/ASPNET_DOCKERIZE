@@ -27,6 +27,7 @@ jobs:
       - name: Check if container is already running
         uses: appleboy/ssh-action@master
         id: check-container
+        continue-on-error: true
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
@@ -45,7 +46,6 @@ jobs:
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
             powershell.exe -command "docker stop karizma; docker rm karizma"
-        continue-on-error: true
 
       - name: Load new Docker image and run container
         uses: appleboy/ssh-action@master
@@ -56,6 +56,7 @@ jobs:
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
             powershell.exe -command "docker load -i C:\Users\comet\Desktop\karizma.tar; docker run -d -p 8066:80 --name karizma karizma"
+
 
 
 
