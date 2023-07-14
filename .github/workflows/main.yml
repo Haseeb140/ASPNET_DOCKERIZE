@@ -31,11 +31,10 @@ jobs:
           password: ${{ secrets.WINDOWS_VM_PASSWORD }}
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
-            powershell.exe -command "if (docker ps -q --filter name=karizma) { exit 0 } else { exit 1 }"
+            powershell.exe -command "if (docker inspect -f '{{.State.Running}}' karizma) { exit 0 } else { exit 1 }"
 
       - name: Stop and remove existing container (if present)
         uses: appleboy/ssh-action@master
-        continue-on-error: true
         if: steps.check-container.outputs.stdout == '0'
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
@@ -54,4 +53,5 @@ jobs:
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
             powershell.exe -command "docker load -i C:\Users\comet\Desktop\karizma.tar; docker run -d -p 8066:80 --name karizma karizma"
+
 
