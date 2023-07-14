@@ -35,7 +35,8 @@ jobs:
 
       - name: Stop and remove existing container (if present)
         uses: appleboy/ssh-action@master
-        if: ${{ steps.check-container.outputs.stdout == '0' }}
+        continue-on-error: true
+        if: steps.check-container.outputs.stdout == '0'
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
@@ -53,3 +54,4 @@ jobs:
           port: ${{ secrets.WINDOWS_VM_PORT }}
           script: |
             powershell.exe -command "docker load -i C:\Users\comet\Desktop\karizma.tar; docker run -d -p 8066:80 --name karizma karizma"
+
