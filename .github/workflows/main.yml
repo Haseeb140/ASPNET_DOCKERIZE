@@ -36,7 +36,7 @@ jobs:
 
       - name: Stop and remove existing container (if present)
         uses: appleboy/ssh-action@master
-        if: ${{ steps.check-container.outputs.stdout == '994f6b38514d' }}
+        if: ${{ steps.check-container.outputs.stdout == '\n' }}
         with:
           host: ${{ secrets.WINDOWS_VM_HOST }}
           username: ${{ secrets.WINDOWS_VM_USERNAME }}
